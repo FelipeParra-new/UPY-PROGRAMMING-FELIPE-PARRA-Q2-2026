@@ -1,0 +1,41 @@
+#INPUT
+GET a, b, f_x, method from user
+n <- 1000
+area <- 0.0
+shift <- 0
+constant <- 0
+
+#Process
+IF method is equal "RRM"
+    shift <- 1
+ENDIF
+
+IF method is equal "MPM"
+    constant <- h/2
+ENDIF
+
+IF method is equal "TRP"
+    shift <- 1
+ENDIF
+
+h <- (b - a) / n
+
+FOR i IN RANGE (0 + shift, n + shift) DO
+    xi <- a + i * h + constant
+    height <- f_x(xi)
+    
+    IF method is equal "TRP"
+        area <- area + 2 * height * h
+    ELSE
+        area <- area + height * h
+    ENDIF
+ENDFOR
+
+IF method is equal "TRP"
+    fa <- f_x(a)
+    fb <- f_x(b)
+    area <- (area + (fa * h) + (fb * h)) / 2
+ENDIF
+
+#OUTPUT
+DISPLAY "The integration of " + f_x + " is " + area
