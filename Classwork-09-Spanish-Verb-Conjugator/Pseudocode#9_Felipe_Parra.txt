@@ -1,0 +1,38 @@
+# Declaración de estructuras principales
+    Define pronombres = ["Yo", "Tu", "El", "Nosotros", "Vosotros", "Ellos"]
+    Define conjugations = Array[6] # Arreglo vacío de 6 posiciones
+    
+    # INPUT
+    Display "Ingrese el verbo en español: "
+    Get verb
+    
+    # PROCESS
+    # Extracción de la raíz y la terminación
+    Define stem = substring(verb, 0, length(verb) - 2) 
+    Define ending = substring(verb, length(verb) - 2, length(verb))
+    
+    # Estructura de decisión para emparejar las terminaciones
+    If ending == "ar" Then
+        conjugations = ["o", "as", "a", "amos", "ais", "an"]
+    Else
+        If ending == "er" Then
+            conjugations = ["o", "es", "e", "emos", "eis", "en"]
+        Else
+            If ending == "ir" Then
+                conjugations = ["o", "es", "e", "imos", "is", "en"]
+            Else
+                Display "Terminación no válida."
+            End If
+        End If
+    End If
+    
+    # OUTPUT
+    # Bucle para mostrar la conjugación completa en pantalla
+    For index = 0 To length(pronombres) - 1
+        Define pronombre_actual = pronombres[index]
+        Define termination = conjugations[index]
+        
+        Display pronombre_actual + " " + stem + termination
+    End For
+
+END
