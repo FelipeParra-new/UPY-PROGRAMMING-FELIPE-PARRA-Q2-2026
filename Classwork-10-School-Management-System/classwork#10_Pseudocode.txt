@@ -1,0 +1,191 @@
+
+# 1. DATA INITIALIZATION MODULE (Data Setup)
+# Storage containing credentials, access clearance, and full names
+SET users TO {
+    "jperez"   : {"password": "1234", "rol": "student",     "name": "Juan Pérez"},
+    "dromo"    : {"password": "1234", "rol": "student",     "name": "Daniela Romo"},
+    "mjuarez"  : {"password": "1234", "rol": "student",     "name": "Mauricio Juárez"},
+    "mlopez"   : {"password": "1234", "rol": "student",     "name": "María López"},
+    "euc"      : {"password": "1234", "rol": "student",     "name": "Ernesto Uc"},
+    "cbalam"   : {"password": "1234", "rol": "student",     "name": "Carlos Balam"},
+    "jpedrozo" : {"password": "1234", "rol": "professor",   "name": "Jorge Pedrozo"},
+    "dgamboa"  : {"password": "1234", "rol": "coordinator", "name": "Didier Gamboa"}
+}
+
+# Indexed collection of subjects to structure data grids
+SET subjects TO [
+    "Discrete Mathematics", "Programming", "English II", 
+    "Differential Calculus", "Probability and Statistics", 
+    "Computer and Server Architecture", "Socio-Emotional Skills and Conflict Management"
+]
+
+# Multidimensional mapping for grades tracking
+SET notes TO {
+    "jperez"  : {"Discrete Mathematics": 8.5, "Programming": 9.2, "English II": 9.0, "Differential Calculus": 7.8, "Probability and Statistics": 8.3, "Computer and Server Architecture": 6.8, "Socio-Emotional Skills and Conflict Management": 9.5},
+    "dromo"   : {"Discrete Mathematics": 9.0, "Programming": 6.7, "English II": 9.4, "Differential Calculus": 6.2, "Probability and Statistics": 9.1, "Computer and Server Architecture": 6.5, "Socio-Emotional Skills and Conflict Management": 9.8},
+    "mjuarez" : {"Discrete Mathematics": 7.5, "Programming": 8.0, "English II": 8.5, "Differential Calculus": 7.0, "Probability and Statistics": 7.8, "Computer and Server Architecture": 6.2, "Socio-Emotional Skills and Conflict Management": 8.9},
+    "mlopez"  : {"Discrete Mathematics": 9.5, "Programming": 9.8, "English II": 9.2, "Differential Calculus": 9.0, "Probability and Statistics": 9.6, "Computer and Server Architecture": 9.4, "Socio-Emotional Skills and Conflict Management": 10.0},
+    "euc"     : {"Discrete Mathematics": 8.2, "Programming": 6.9, "English II": 8.8, "Differential Calculus": 6.0, "Probability and Statistics": 6.4, "Computer and Server Architecture": 8.1, "Socio-Emotional Skills and Conflict Management": 9.0},
+    "cbalam"  : {"Discrete Mathematics": 8.8, "Programming": 9.0, "English II": 8.5, "Differential Calculus": 6.6, "Probability and Statistics": 8.9, "Computer and Server Architecture": 8.7, "Socio-Emotional Skills and Conflict Management": 9.2}
+}
+
+# 2. AUTHENTICATION MODULE (Verification Interface)
+# =====================================================================
+
+SET login_success TO False
+
+WHILE login_success IS False DO
+    DISPLAY "Write the username: "
+    GET username
+    DISPLAY "Write the password: "
+    GET password
+    
+    # Conditional verification within our primary dataset
+    IF username KEY_EXISTS_IN users AND users[username]["password"] == password THEN
+        SET login_success TO True
+        SET session_role TO users[username]["rol"]
+        SET session_name TO users[username]["name"]
+        
+        DISPLAY "Welcome!, " + session_name + " (" + session_role + ")"
+        DISPLAY "========================================"
+    ELSE
+        DISPLAY "Incorrect Username/Password, try again "
+    ENDIF
+ENDWHILE
+
+# =====================================================================
+# 3. ROUTING & INTERFACE SECTIONS (Session Operations)
+# =====================================================================
+
+# ---------------------------------------------------------------------
+# SESSION ROUTE A: STUDENT REPORT
+# ---------------------------------------------------------------------
+IF session_role == "student" THEN
+    DISPLAY "_________________________________"
+    DISPLAY "School report"
+    DISPLAY "_________________________________"
+    
+    SET approved_set TO EMPTY_SET
+    SET pending_set TO EMPTY_SET
+    
+    # Process individual course metrics
+    FOR EACH subject, grade IN notes[username] DO
+        # CRITICAL FILTER: Grades under 7.0 bypass execution print display
+        IF grade >= 7.0 THEN
+            CALL approved_set.add(subject)
+            DISPLAY FormattedLeft(subject, 35) + " : " + grade
+        ELSE
+            CALL pending_set.add(subject)
+        ENDIF
+    ENDFOR
+    
+    DISPLAY "Approved: " + approved_set
+    DISPLAY "Pending : " + pending_set
+
+# ---------------------------------------------------------------------
+# SESSION ROUTE B: PROFESSOR DASHBOARD
+# ---------------------------------------------------------------------
+ELSEIF session_role == "professor" THEN
+    DISPLAY " Students"
+    DISPLAY "___________________________"
+    
+    # Loop profile structures to isolate valid query targets
+    FOR EACH user_key, user_info IN users DO
+        IF user_info["rol"] == "student" THEN
+            DISPLAY "User: " + FormattedLeft(user_key, 10) + " | Student: " + user_info["name"]
+        ENDIF
+    ENDFOR
+    
+    SET continue_grading TO True
+    
+    WHILE continue_grading IS True DO
+        DISPLAY "\nStudent to grade (username): "
+        GET target_student
+        
+        # Break structure if identifier fails verification
+        IF target_student NOT_KEY_EXISTS_IN notes THEN
+            SET continue_grading TO False
+        ELSE
+            DISPLAY " Subjects"
+            DISPLAY "_____________________________"
+            FOR EACH subj IN subjects DO
+                DISPLAY subj
+            ENDFOR
+            
+            DISPLAY "\nWrite the subject to grade: "
+            GET target_subject
+            
+            IF target_subject NOT_KEY_EXISTS_IN notes[target_student] THEN
+                DISPLAY "Subject not found."
+            ELSE
+                DISPLAY "New grade: "
+                GET new_grade
+                SET old_grade TO notes[target_student][target_subject]
+                
+                DISPLAY "Do you confirm (yes/no)?"
+                DISPLAY target_subject + ": " + old_grade + " ==> " + new_grade
+                GET confirm
+                SET confirm TO Trim(Lowercase(confirm))
+                
+                # Assign values only upon validation
+                IF confirm == "yes" THEN
+                    SET notes[target_student][target_subject] TO new_grade
+                    DISPLAY "Grade updated!"
+                    DISPLAY notes[target_student] 
+                ELSE
+                    DISPLAY "Update cancelled."
+                ENDIF
+            ENDIF
+            
+            DISPLAY "Write other thing to exit"
+        ENDIF
+    ENDWHILE
+
+# ---------------------------------------------------------------------
+# SESSION ROUTE C: COORDINATOR REPORT
+# ---------------------------------------------------------------------
+ELSEIF session_role == "coordinator" THEN
+    DISPLAY " Professors"
+    DISPLAY "___________________________"
+    FOR EACH user_key, user_info IN users DO
+        IF user_info["rol"] == "professor" THEN
+            DISPLAY "User: " + FormattedLeft(user_key, 10) + " | Professor: " + user_info["name"]
+        ENDIF
+    ENDFOR
+    
+    DISPLAY "________________________________________"
+    DISPLAY " Students"
+    DISPLAY "________________________________________"
+    
+    SET student_users TO EMPTY_LIST
+    
+    FOR EACH user_key, user_info IN users DO
+        IF user_info["rol"] == "student" THEN
+            DISPLAY "User: " + FormattedLeft(user_key, 10) + " | Student: " + user_info["name"]
+            CALL student_users.append(user_key)
+        ENDIF
+    ENDFOR
+    
+    DISPLAY "________________________________________"
+    DISPLAY " Records"
+    DISPLAY "________________________________________"
+    
+    # Construct tabular structure layout string headers
+    SET header TO FormattedLeft("SUBJECTS", 15)
+    FOR EACH su IN student_users DO
+        SET header TO header + " | " + FormattedLeft(su, 7)
+    ENDFOR
+    DISPLAY header
+    DISPLAY Repeat("-", Length(header))
+    
+    # Dynamic grid cross-referencing row data assembly
+    FOR EACH subj IN subjects DO
+        # Trim labels for formatting alignment
+        SET row_output TO FormattedLeft(Substring(subj, 0, 13), 15)
+        FOR EACH su IN student_users DO
+            SET grade TO notes[su][subj]
+            SET row_output TO row_output + " | " + FormattedLeft(FormatDecimal(grade, 1), 7)
+        ENDFOR
+        DISPLAY row_output
+    ENDFOR
+ENDIF
