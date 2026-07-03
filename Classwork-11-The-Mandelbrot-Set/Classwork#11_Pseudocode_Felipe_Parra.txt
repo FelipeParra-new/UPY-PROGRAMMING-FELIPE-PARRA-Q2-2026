@@ -1,0 +1,44 @@
+# INPUT
+Create empty dictionary called config
+
+# Get settings from the configuration file
+Open file "config.txt" in read mode
+For each line in file:
+    Get parameter and value by splitting the line at "="
+    
+    If value contains ".":
+        Set config[parameter] = convert value to Float
+    Else:
+        Set config[parameter] = convert value to Integer
+Close file
+
+# Get specific variables from the dictionary
+Get width from config["ancho"]
+Get height from config["alto"]
+Get max_iter from config["max_iter"]
+
+# PROCESS
+# Setup for the CSV file
+Open file "mandelbrot.csv" in write mode
+Write header "row,column,iterations" to "mandelbrot.csv"
+
+# Iterate through every pixel in the grid
+For row from 0 to height - 1:
+    For column from 0 to width - 1:
+        
+        # Calculate real and imaginary coordinates for the complex plane
+        Set real = config["real_min"] + (column / width) * (config["real_max"] - config["real_min"])
+        Set imag = config["imag_min"] + (row / height) * (config["imag_max"] - config["imag_min"])
+        Set c = ComplexNumber(real, imag)
+        
+        Set z = 0 + 0j
+        Set iterations = 0
+        
+        # Evaluate if the point belongs to the Mandelbrot set
+        While (AbsoluteValue(z) <= 2) AND (iterations < max_iter):
+            Set z = (z * z) + c
+            Set iterations = iterations + 1
+            
+        # OUTPUT
+        # Save the result of the current pixel to the CSV
+        Write row, column, iterations to "mandelbrot.csv"
