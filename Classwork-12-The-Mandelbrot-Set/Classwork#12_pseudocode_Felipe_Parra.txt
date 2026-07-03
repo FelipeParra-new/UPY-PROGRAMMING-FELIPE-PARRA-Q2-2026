@@ -1,0 +1,74 @@
+# 1. INPUT 
+
+# Load configuration parameters
+Create an empty dictionary named config
+
+Open file "config.txt" in READ mode as config_file
+Read all lines from config_file
+Close config_file
+
+For each line in config_lines:
+    Remove whitespace from the line
+    Split the line by the "=" character into (parameter, value)
+    If value contains a dot "." then:
+        Convert value to FLOAT
+    Else:
+        Convert value to INTEGER
+    EndIf
+    Save config[parameter] = value
+EndFor
+
+Print config
+
+# Load calculated fractal dataset
+Open file "mandelbrot.csv" in READ mode as csv_file
+Read all lines from csv_file and store them in line_list
+Close csv_file
+
+# Remove the first line which contains the column headers
+Remove first element from line_list
+
+
+# 2. PROCESS
+
+# Unpack dimensions and configuration limits
+max_iter = config["max_iter"]
+width = config["ancho"]
+height = config["alto"]
+
+# Create an empty canvas in HSV (Hue, Saturation, Value) mode
+Create new_image with mode "HSV" and size (width, height)
+
+# Process each pixel's iteration count to map its color
+For each line in line_list:
+    Remove whitespace from the line
+    Split the line by commas "," into (row, column, iterations)
+    
+    Convert row to INTEGER
+    Convert column to INTEGER
+    Convert iterations to INTEGER
+    
+    # Determine HSV color tuple: (Hue, Saturation, Value)
+    If iterations is EQUAL to max_iter then:
+        # Inside the set: Hue=0, Saturation=0, Value=0 (Absolute Black)
+        pixel_color = (0, 0, 0)
+    Else:
+        # Outside the set: Scale iterations to define the rainbow shade (Hue)
+        hue_value = INTEGER((iterations / max_iter) * 255)
+        # Vivid color: Hue varies, Saturation=255 (Max), Value=255 (Max)
+        pixel_color = (hue_value, 255, 255)
+    EndIf
+    
+    # Draw the specific pixel onto the HSV canvas
+    Draw pixel on new_image at position (column, row) with pixel_color
+EndFor
+
+# Convert the canvas to standard RGB format for proper file saving
+Convert new_image to mode "RGB"
+
+
+# 3. OUTPUT
+
+# Save the rendered canvas as an image file
+Save new_image with the name "mandelbrot.png"
+Print "DONE"
