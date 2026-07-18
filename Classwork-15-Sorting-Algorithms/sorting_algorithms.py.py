@@ -10,6 +10,26 @@ def bubble_sort(numbers):
             if numbers[pair] > numbers[pair + 1]:
                 numbers[pair], numbers[pair + 1] = numbers [pair+1], numbers[pair]
 
+# Selection sort 
+def selection_sort(numbers):
+    n = len(numbers)
+    for i in range(n):
+        min_idx = i
+        for j in range(i + 1, n):
+            if numbers[j] < numbers[min_idx]:
+                min_idx = j
+        if min_idx != i:
+            numbers[i], numbers[min_idx] = numbers[min_idx], numbers[i]
+
+# Insertion sort
+def insertion_sort(numbers):
+    n = len(numbers)
+    for i in range(1, n):
+        j = i
+        while j > 0 and numbers[j - 1] > numbers[j]:
+            numbers[j], numbers[j - 1] = numbers[j - 1], numbers[j]
+            j -= 1
+            
 def draw_bars(numbers, selected=()):
     stddraw.clear()
     n = len(numbers)

@@ -9,6 +9,32 @@ FUNCTION BubbleSort(numbers):
     END FOR
 END FUNCTION
 
+FUNCTION SelectionSort(numbers):
+    GET length of numbers AS n
+    FOR i FROM 0 TO n - 1 DO:
+        SET min_idx TO i
+        FOR j FROM i + 1 TO n - 1 DO:
+            IF numbers[j] < numbers[min_idx] THEN:
+                SET min_idx TO j
+            END IF
+        END FOR
+        IF min_idx IS NOT EQUAL TO i THEN:
+            SWAP numbers[i] AND numbers[min_idx]
+        END IF
+    END FOR
+END FUNCTION
+
+FUNCTION InsertionSort(numbers):
+    GET length of numbers AS n
+    FOR i FROM 1 TO n - 1 DO:
+        SET j TO i
+        WHILE j > 0 AND numbers[j - 1] > numbers[j] DO:
+            SWAP numbers[j] AND numbers[j - 1]
+            SET j TO j - 1
+        END WHILE
+    END FOR
+END FUNCTION
+
 FUNCTION DrawBars(numbers, selected):
     CLEAR canvas
     GET length of numbers AS n
@@ -85,7 +111,10 @@ MAIN PROGRAM:
         GET 10 random numbers between 0 and 100
         SET numbers TO generated list
         PRINT "Before sort: " + numbers
+        
         CALL BubbleSortAnimated(numbers)
+        
         PRINT "After sort: " + numbers
         PAUSE canvas indefinitely
+    END
     END
